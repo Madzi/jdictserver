@@ -1,32 +1,9 @@
 package org.dict.server;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StringBufferInputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.StringTokenizer;
-
-import org.dict.kernel.HTMLPrinter;
-import org.dict.kernel.IAnswer;
-import org.dict.kernel.IDictEngine;
-import org.dict.kernel.IRequest;
-import org.dict.kernel.SimpleRequest;
+import java.net.*;
+import java.io.*;
+import java.util.*;
+import org.dict.kernel.*;
 
 public class DictHTTPConnection implements Runnable {
 	private IDictEngine fEngine;
@@ -52,8 +29,8 @@ public class DictHTTPConnection implements Runnable {
 				InputStream is = new FileInputStream(f);
 				props.load(is);
 				is.close();
-				for (Enumeration keysEnum = props.keys(); keysEnum.hasMoreElements();) {
-					Object k = keysEnum.nextElement();
+				for (Enumeration enum = props.keys(); enum.hasMoreElements();) {
+					Object k = enum.nextElement();
 					Object v = props.get(k);
 					File ff = new File((String)v);
 					if (ff.exists()) {
