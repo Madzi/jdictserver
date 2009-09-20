@@ -1,22 +1,76 @@
 package org.dict.client;
 
 //import org.dict.server.*;
-import java.awt.*;
-import java.io.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.PropertyResourceBundle;
 import java.util.Vector;
 
-import javax.swing.*;
-import java.awt.event.*;
-
-import javax.swing.event.*;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
 
-import java.awt.datatransfer.*;
-import org.dict.kernel.*;
+import org.dict.kernel.Database;
+import org.dict.kernel.DatabaseConfiguration;
+import org.dict.kernel.DictEngine;
+import org.dict.kernel.IAnswer;
+import org.dict.kernel.IDatabase;
+import org.dict.kernel.IDictEngine;
+import org.dict.kernel.IRequest;
+import org.dict.kernel.IWordPosition;
+import org.dict.kernel.SimpleRequest;
 
 /**
  * Insert the type's description here.
@@ -621,9 +675,9 @@ public class TDDT extends JFrame {
 		try {
 			FileInputStream is = new FileInputStream("TDDT.properties");
 			PropertyResourceBundle rb = new PropertyResourceBundle(is);
-			Enumeration enum = rb.getKeys();
-			while (enum.hasMoreElements()) {
-				String key = (String) enum.nextElement();
+			Enumeration keysEnum = rb.getKeys();
+			while (keysEnum.hasMoreElements()) {
+				String key = (String) keysEnum.nextElement();
 				if (key.startsWith("db.")) {
 					String val = rb.getString(key);
 					addDatabases(val);
