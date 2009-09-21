@@ -1,6 +1,6 @@
 package org.dict.kernel;
 
-import java.io.*;
+import java.io.IOException;
 /**
  * Insert the type's description here.
  * Creation date: (28.07.01 22:45:52)

@@ -1,6 +1,8 @@
 package org.dict.zip;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 
 public class RandomAccessInputStream extends InputStream {
 

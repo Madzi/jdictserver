@@ -1,10 +1,36 @@
 package org.dict.client;
 
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.datatransfer.*;
-import org.dict.kernel.*;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Panel;
+import java.awt.TextArea;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import org.dict.kernel.IAnswer;
+import org.dict.kernel.IDatabase;
+import org.dict.kernel.IDictEngine;
+import org.dict.kernel.IRequest;
+import org.dict.kernel.SimpleRequest;
 /**
  * Insert the type's description here.
  * Creation date: (28.02.2002 23:18:11)
@@ -132,7 +158,7 @@ void lookup(String s, boolean append) {
     PrintWriter out = new PrintWriter(w);
     IRequest req = new SimpleRequest("", "word="+s);
     try {
-        org.dict.kernel.PlainPrinter.printAnswers(engine, req, a, false, out);
+        org.dict.kernel.answer.printer.PlainPrinter.printAnswers(engine, req, a, false, out);
         out.flush();
     } catch (Exception e) {
         e.printStackTrace(out);

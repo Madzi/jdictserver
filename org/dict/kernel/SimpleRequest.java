@@ -1,7 +1,8 @@
 package org.dict.kernel;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.util.StringTokenizer;
+import java.util.Vector;
 /**
  * Insert the type's description here.
  * Creation date: (10.03.2002 16:59:36)

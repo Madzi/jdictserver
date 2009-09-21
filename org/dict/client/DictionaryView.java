@@ -1,15 +1,39 @@
 package org.dict.client;
 
-import org.dict.server.*;
-import java.awt.*;
-import java.io.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import java.awt.event.*;
-import java.awt.datatransfer.*;
-import org.dict.kernel.*;
+import org.dict.kernel.DictEngine;
+import org.dict.kernel.IAnswer;
+import org.dict.kernel.IDatabase;
+import org.dict.kernel.IDictEngine;
+import org.dict.kernel.IRequest;
+import org.dict.kernel.SimpleRequest;
+import org.dict.server.DatabaseFactory;
 
 public class DictionaryView {
 	Clipboard clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -192,7 +216,7 @@ public class DictionaryView {
 		PrintWriter out = new PrintWriter(w);
 		IRequest req = new SimpleRequest("", "fmt=u&word="+s);
 		try {
-			org.dict.kernel.HTMLPrinter.printAnswers(engine, req, a, true, out);
+			org.dict.kernel.answer.printer.HTMLPrinter.printAnswers(engine, req, a, true, out);
 			out.flush();
 		} catch (Exception e) {
 			e.printStackTrace(out);

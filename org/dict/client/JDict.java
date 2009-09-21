@@ -1,7 +1,10 @@
 package org.dict.client;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.Socket;
 /**
  * Insert the type's description here.
  * Creation date: (24.02.2002 16:33:09)

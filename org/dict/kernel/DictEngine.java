@@ -1,9 +1,14 @@
 package org.dict.kernel;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Vector;
-//import java.util.StringTokenizer;
-//import com.sun.java.util.collections.*;
-import java.io.*;
+
+import org.dict.kernel.answer.Answer;
 /**
  * Insert the type's description here.
  * Creation date: (29.07.01 12:47:32)

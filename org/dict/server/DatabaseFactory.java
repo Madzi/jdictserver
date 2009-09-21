@@ -1,8 +1,18 @@
 package org.dict.server;
 
-import org.dict.kernel.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
-import java.io.*;
+import org.dict.kernel.Database;
+import org.dict.kernel.DatabaseConfiguration;
+import org.dict.kernel.DictEngine;
+import org.dict.kernel.IComparator;
+import org.dict.kernel.IDictEngine;
+import org.dict.kernel.KeyComparator;
+import org.dict.util.Logger;
 /**
  * <p>To sort the index file: java org.dict.server.DatabaseFactory indexFile
  *
@@ -58,12 +68,12 @@ public static void dbSort(String in, IComparator c) {
 	String bak = base+".bak";
 	System.out.println("Sort file "+in+" and copy original file to "+bak);
 	try {
-		org.dict.kernel.KeyList kl = new org.dict.kernel.MemoryKeyList(in);
+		org.dict.kernel.list.KeyList kl = new org.dict.kernel.list.MemoryKeyList(in);
 		org.dict.kernel.IKey[] arr = new org.dict.kernel.IKey[kl.size()];
 		for (int i = 0; i < arr.length; i++){
 			arr[i] = (org.dict.kernel.IKey) kl.get(i);
 		}
-		org.dict.kernel.ListUtil.sort(arr, c);
+		org.dict.kernel.list.ListUtil.sort(arr, c);
 		BufferedOutputStream w = new BufferedOutputStream(new FileOutputStream(tmp));
 		for (int i = 0; i < arr.length; i++){
 			w.write((arr[i].getKey()+"\t"+arr[i].getOffset()+"\t"+arr[i].getLength()).getBytes(kl.getEncoding()));

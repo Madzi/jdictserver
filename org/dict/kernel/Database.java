@@ -1,7 +1,18 @@
 package org.dict.kernel;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Vector;
-import java.io.*;
+
+import org.dict.kernel.answer.Answer;
+import org.dict.kernel.answer.printer.HTMLPrinter;
+import org.dict.kernel.answer.printer.PlainPrinter;
+import org.dict.kernel.list.FileKeyList;
+import org.dict.kernel.list.KeyList;
+import org.dict.kernel.list.ListUtil;
+import org.dict.kernel.list.MemoryKeyList;
 
 /**
  * Insert the type's description here.

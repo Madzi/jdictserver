@@ -516,7 +516,7 @@ public class TDDT extends JFrame {
 		PrintWriter out = new PrintWriter(w);
 		IRequest req = new SimpleRequest("", "word="+s);
 		try {
-			org.dict.kernel.PlainPrinter.printAnswers(engine, req, a, false, out);
+			org.dict.kernel.answer.printer.PlainPrinter.printAnswers(engine, req, a, false, out);
 			out.flush();
 		} catch (Exception e) {
 			e.printStackTrace(out);
