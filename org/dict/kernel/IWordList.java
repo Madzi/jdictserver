@@ -6,9 +6,10 @@ package org.dict.kernel;
 
 /**
  * @author duc
- *
+ * 
  */
 public interface IWordList {
 	String getDescription();
+
 	IWordPosition[] getWordPositions();
 }

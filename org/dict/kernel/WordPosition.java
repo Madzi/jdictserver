@@ -1,13 +1,14 @@
 package org.dict.kernel;
 
 /**
- * Insert the type's description here.
- * Creation date: (25.02.2002 18:01:20)
- * @author: 
+ * Insert the type's description here. Creation date: (25.02.2002 18:01:20)
+ * 
+ * @author:
  */
 public class WordPosition implements IWordPosition {
 	int fPosition;
 	String fKey;
+
 	/**
 	 * Neighbor constructor comment.
 	 */
@@ -16,12 +17,14 @@ public class WordPosition implements IWordPosition {
 		fKey = k;
 		fPosition = pos;
 	}
+
 	/**
 	 * getKey method comment.
 	 */
 	public java.lang.String getKey() {
 		return fKey;
 	}
+
 	/**
 	 * getPosition method comment.
 	 */
@@ -29,6 +32,7 @@ public class WordPosition implements IWordPosition {
 		return fPosition;
 	}
 
+	@Override
 	public String toString() {
 		return fKey;
 	}

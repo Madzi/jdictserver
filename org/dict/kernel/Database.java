@@ -15,12 +15,26 @@ import org.dict.kernel.list.ListUtil;
 import org.dict.kernel.list.MemoryKeyList;
 
 /**
- * Insert the type's description here.
- * Creation date: (28.07.01 21:54:33)
+ * Insert the type's description here. Creation date: (28.07.01 21:54:33)
+ * 
  * @author: Administrator
  */
 public class Database implements IDatabase {
 	public static int MAX_MATCHES = Integer.getInteger("matches", 15).intValue();
+
+	public static IDatabase createDatabase(DatabaseConfiguration dc) throws Exception {
+		Database ret = new Database();
+		String dbClass = dc.getDbClass();
+		if (dbClass != null) {
+			try {
+				ret = (Database) Class.forName(dbClass).newInstance();
+			} catch (Throwable t) {
+				// DatabaseFactory.log("Instantiation error: " + t);
+			}
+		}
+		ret.initialize(dc);
+		return ret;
+	}
 
 	private IComparator fComparator;
 	private IDataAccessor fDataAccessor;
@@ -32,21 +46,25 @@ public class Database implements IDatabase {
 	private String fName;
 	private IAnswerPrinter fPlainPrinter;
 	private File indexFile, dataFile;
+
 	/**
 	 * Database constructor comment.
 	 */
 	public Database() {
 		super();
 	}
+
 	int compare(IKey k1, IKey k2) {
 		return getComparator().compare(k1, k2);
 	}
+
 	/**
 	 * define method comment.
 	 */
 	public String define(String word) {
 		return defineMatch(word, true, STRATEGY_NONE).getDefinition();
 	}
+
 	/**
 	 * define method comment.
 	 */
@@ -57,7 +75,7 @@ public class Database implements IDatabase {
 			pos = Math.abs(pos) % kl.size();
 		}
 		kl.startUp();
-		String word = ((IKey)kl.get(pos)).getKey();
+		String word = ((IKey) kl.get(pos)).getKey();
 		IWordList neighbors = findAdjacentWords(word, pos, MAX_MATCHES);
 		if (define && pos >= 0) {
 			byte[] b = readAll(pos, pos);
@@ -66,13 +84,14 @@ public class Database implements IDatabase {
 			} catch (Throwable e) {
 				def = new String(b);
 			}
-			//System.out.println(def);
+			// System.out.println(def);
 		}
 		kl.shutDown();
 		IAnswer ret = new Answer(this, word, pos, def);
 		ret.setAdjacentWords(neighbors);
 		return ret;
 	}
+
 	/**
 	 * define method comment.
 	 */
@@ -105,25 +124,27 @@ public class Database implements IDatabase {
 		kl.shutDown();
 		return ret;
 	}
-	
+
+	@Override
 	public boolean equals(Object o) {
 		if (o == null || !(o instanceof Database)) {
 			return false;
 		}
 		Database db = (Database) o;
-		return dataFile.equals(db.dataFile) && indexFile.equals(db.indexFile); 	}
+		return dataFile.equals(db.dataFile) && indexFile.equals(db.indexFile);
+	}
 
 	IWordList findAdjacentWords(String word, int pos, int max) {
 		KeyList kl = getIndex();
 		if (pos < 0) {
 			pos = -pos - 1;
 		}
-		int beg = Math.max(0, pos - (max/2));
-		int end = Math.min(kl.size()-1, beg+max);
-		IWordPosition[] ret = new IWordPosition[end-beg+1];
-		for (int i = beg; i <= end; i++){
+		int beg = Math.max(0, pos - (max / 2));
+		int end = Math.min(kl.size() - 1, beg + max);
+		IWordPosition[] ret = new IWordPosition[end - beg + 1];
+		for (int i = beg; i <= end; i++) {
 			IKey k = (IKey) kl.get(i);
-			ret[i-beg] = new WordPosition(k.getKey(), i);
+			ret[i - beg] = new WordPosition(k.getKey(), i);
 		}
 		return new WordList("Adjacent words", ret);
 	}
@@ -132,16 +153,17 @@ public class Database implements IDatabase {
 		if (pos < 0) {
 			return new WordList();
 		} else {
-			IWordPosition[] arr = new IWordPosition[]{new WordPosition(word, pos)};
+			IWordPosition[] arr = new IWordPosition[] { new WordPosition(word, pos) };
 			return new WordList("Exact matches", arr);
 		}
 	}
+
 	IWordList findPrefixMatches(String word, int pos, int max) {
 		KeyList kl = getIndex();
 		if (pos < 0) {
 			pos = -pos - 1;
 		}
-		Vector ls = new Vector(max);
+		Vector<WordPosition> ls = new Vector<WordPosition>(max);
 		String lword = word.toLowerCase();
 		boolean match = false;
 		do {
@@ -160,16 +182,16 @@ public class Database implements IDatabase {
 		} while (match);
 		IWordPosition[] ret = new IWordPosition[ls.size()];
 		ls.copyInto(ret);
-		String desc = "Words that begin with \""+word+"\"";
+		String desc = "Words that begin with \"" + word + "\"";
 		if (ret.length == max) {
-			desc = "First "+max+" words that begin with \""+word+"\"";
+			desc = "First " + max + " words that begin with \"" + word + "\"";
 		}
 		return new WordList(desc, ret);
 	}
 
 	IWordList findSubstringMatches(String word, int max) {
 		KeyList kl = getIndex();
-		Vector ls = new Vector(max);
+		Vector<WordPosition> ls = new Vector<WordPosition>(max);
 		String lword = word.toLowerCase();
 		int count = 0;
 		for (int i = 0; count < max && i < kl.size(); i++) {
@@ -181,16 +203,16 @@ public class Database implements IDatabase {
 		}
 		IWordPosition[] ret = new IWordPosition[ls.size()];
 		ls.copyInto(ret);
-		String desc = "Words that contain string \""+word+"\"";
+		String desc = "Words that contain string \"" + word + "\"";
 		if (ret.length == max) {
-			desc = "First "+max+" words that contain string \""+word+"\"";
+			desc = "First " + max + " words that contain string \"" + word + "\"";
 		}
 		return new WordList(desc, ret);
 	}
 
 	IWordList findSuffixMatches(String word, int max) {
 		KeyList kl = getIndex();
-		Vector ls = new Vector(max);
+		Vector<WordPosition> ls = new Vector<WordPosition>(max);
 		String lword = word.toLowerCase();
 		int count = 0;
 		for (int i = 0; count < max && i < kl.size(); i++) {
@@ -202,16 +224,16 @@ public class Database implements IDatabase {
 		}
 		IWordPosition[] ret = new IWordPosition[ls.size()];
 		ls.copyInto(ret);
-		String desc = "Words that end with \""+word+"\"";
+		String desc = "Words that end with \"" + word + "\"";
 		if (ret.length == max) {
-			desc = "First "+max+" words that end with \""+word+"\"";
+			desc = "First " + max + " words that end with \"" + word + "\"";
 		}
 		return new WordList(desc, ret);
 	}
 
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (11.08.01 10:09:50)
+	 * Insert the method's description here. Creation date: (11.08.01 10:09:50)
+	 * 
 	 * @return org.dict.kernel.IComparator
 	 */
 	public IComparator getComparator() {
@@ -221,17 +243,19 @@ public class Database implements IDatabase {
 	public IDataAccessor getDataAccessor() {
 		return fDataAccessor;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (28.07.01 22:01:41)
+	 * Insert the method's description here. Creation date: (28.07.01 22:01:41)
+	 * 
 	 * @return java.lang.String
 	 */
 	public java.lang.String getDescription() {
 		return define("00-database-info");
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (03.09.01 21:55:54)
+	 * Insert the method's description here. Creation date: (03.09.01 21:55:54)
+	 * 
 	 * @return java.lang.String
 	 */
 	public java.lang.String getEncoding() {
@@ -245,25 +269,34 @@ public class Database implements IDatabase {
 	public java.lang.String getID() {
 		return fID;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (28.07.01 22:01:41)
+	 * Insert the method's description here. Creation date: (28.07.01 22:01:41)
+	 * 
 	 * @return org.dict.IKeyList
 	 */
 	public KeyList getIndex() {
 		return fIndex;
 	}
+
+	public IWordPosition getKey(int pos) {
+		int p = pos % getSize();
+		String key = ((IKey) getIndex().get(p)).getKey();
+		return new WordPosition(key, p);
+	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (02.09.01 12:46:21)
+	 * Insert the method's description here. Creation date: (02.09.01 12:46:21)
+	 * 
 	 * @return org.dict.kernel.IMorphAnalyzer
 	 */
 	public IMorphAnalyzer getMorphAnalyzer() {
 		return fMorphAnalyzer;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (29.07.01 22:00:15)
+	 * Insert the method's description here. Creation date: (29.07.01 22:00:15)
+	 * 
 	 * @return java.lang.String
 	 */
 	public java.lang.String getName() {
@@ -274,14 +307,15 @@ public class Database implements IDatabase {
 		return fPlainPrinter;
 	}
 
-
 	public int getPosition(String key) {
 		return search(new Key(key, null, null), true);
 	}
+
 	public int getSize() {
 		return getIndex().size();
 	}
-	
+
+	@Override
 	public int hashCode() {
 		return dataFile.hashCode();
 	}
@@ -293,10 +327,10 @@ public class Database implements IDatabase {
 		dataFile = dc.getData();
 		indexFile = dc.getIndex();
 		if (!dataFile.exists()) {
-			throw new Exception("File does not exist: "+dataFile);
+			throw new Exception("File does not exist: " + dataFile);
 		}
 		if (!indexFile.exists()) {
-			throw new Exception("File does not exist: "+indexFile);
+			throw new Exception("File does not exist: " + indexFile);
 		}
 		sb.append("\nCreating database with data file " + dataFile);
 		IDataAccessor acc = null;
@@ -379,12 +413,14 @@ public class Database implements IDatabase {
 		sb.append("\nDatabase created: " + this);
 		return sb.toString();
 	}
+
 	/**
 	 * match method comment.
 	 */
 	public IWordList match(String word, int strategy) {
 		return defineMatch(word, false, strategy).getMatches();
 	}
+
 	byte[] readAll(int start, int end) {
 		IKey k = (IKey) getIndex().get(start);
 		byte[] ret = new byte[0];
@@ -392,11 +428,12 @@ public class Database implements IDatabase {
 			k = (IKey) getIndex().get(i);
 			long off = BASE64Converter.parse(k.getOffset());
 			long len = BASE64Converter.parse(k.getLength());
-			//System.out.println("Read "+len+" from "+off);
+			// System.out.println("Read "+len+" from "+off);
 			byte[] b;
 			try {
 				b = getDataAccessor().readData(off, len);
-				//System.out.println("Length: "+new String(b, "UTF-8").length());
+				// System.out.println("Length: "+new String(b,
+				// "UTF-8").length());
 			} catch (IOException e) {
 				System.out.println(e);
 				ByteArrayOutputStream w = new ByteArrayOutputStream();
@@ -415,10 +452,10 @@ public class Database implements IDatabase {
 		KeyList kl = getIndex();
 		IKey k = (IKey) kl.get(pos);
 		int start = pos, end = pos;
-		//System.out.println(k.getKey());
+		// System.out.println(k.getKey());
 		while (start > 0) {
 			IKey k2 = (IKey) kl.get(start - 1);
-			//System.out.println("Go back. Compare "+k.getKey()+" with "+k2.getKey());
+			// System.out.println("Go back. Compare "+k.getKey()+" with "+k2.getKey());
 			if (compare(k2, k) == 0) {
 				start--;
 			} else {
@@ -427,7 +464,7 @@ public class Database implements IDatabase {
 		}
 		while (end < kl.size() - 1) {
 			IKey k2 = (IKey) kl.get(end + 1);
-			//System.out.println("Go forward. Compare "+k.getKey()+" with "+k2.getKey());
+			// System.out.println("Go forward. Compare "+k.getKey()+" with "+k2.getKey());
 			if (compare(k2, k) == 0) {
 				end++;
 			} else {
@@ -436,6 +473,7 @@ public class Database implements IDatabase {
 		}
 		return readAll(start, end);
 	}
+
 	public int search(IKey k, boolean useMorph) {
 		if (useMorph) {
 			return search(k, getMorphAnalyzer());
@@ -443,24 +481,29 @@ public class Database implements IDatabase {
 			return search(k, null);
 		}
 	}
+
 	public int search(IKey k, IMorphAnalyzer ma) {
 		int pos = ListUtil.search(getIndex(), k, getComparator());
-		if (pos >= 0 || ma == null) return pos;
+		if (pos >= 0 || ma == null)
+			return pos;
 		int range = 500;
-		int beg = Math.max(0, -pos-range+50);
-		int end = Math.min(beg+range, getIndex().size()-1);
+		int beg = Math.max(0, -pos - range + 50);
+		int end = Math.min(beg + range, getIndex().size() - 1);
 		String[] bases = ma.getPossibleBases(k.getKey());
-		for (int i = 0; i < bases.length; i++){
+		for (int i = 0; i < bases.length; i++) {
 			IKey k2 = new Key(bases[i], null, null);
 			int p2 = ListUtil.search(getIndex(), k2, getComparator(), beg, end);
-			if ( p2 >= 0) return p2;
+			if (p2 >= 0)
+				return p2;
 		}
 		return pos;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (11.08.01 10:09:50)
-	 * @param newComparator org.dict.kernel.IComparator
+	 * Insert the method's description here. Creation date: (11.08.01 10:09:50)
+	 * 
+	 * @param newComparator
+	 *            org.dict.kernel.IComparator
 	 */
 	public void setComparator(IComparator newComparator) {
 		fComparator = newComparator;
@@ -469,45 +512,56 @@ public class Database implements IDatabase {
 	public void setDataAccessor(IDataAccessor acc) {
 		fDataAccessor = acc;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (03.09.01 21:55:54)
-	 * @param newEncoding java.lang.String
+	 * Insert the method's description here. Creation date: (03.09.01 21:55:54)
+	 * 
+	 * @param newEncoding
+	 *            java.lang.String
 	 */
 	public void setEncoding(java.lang.String newEncoding) {
 		fEncoding = newEncoding;
 	}
+
 	public void setHTMLPrinter(IAnswerPrinter printer) {
 		fHTMLPrinter = printer;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (7/30/01 6:39:21 PM)
-	 * @param newID java.lang.String
+	 * Insert the method's description here. Creation date: (7/30/01 6:39:21 PM)
+	 * 
+	 * @param newID
+	 *            java.lang.String
 	 */
 	public void setID(java.lang.String newID) {
 		fID = newID;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (28.07.01 22:01:41)
-	 * @param newIndex org.dict.KeyList
+	 * Insert the method's description here. Creation date: (28.07.01 22:01:41)
+	 * 
+	 * @param newIndex
+	 *            org.dict.KeyList
 	 */
 	public void setIndex(KeyList newIndex) {
 		fIndex = newIndex;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (02.09.01 12:46:21)
-	 * @param newMorphAnalyzer org.dict.kernel.IMorphAnalyzer
+	 * Insert the method's description here. Creation date: (02.09.01 12:46:21)
+	 * 
+	 * @param newMorphAnalyzer
+	 *            org.dict.kernel.IMorphAnalyzer
 	 */
 	public void setMorphAnalyzer(IMorphAnalyzer newMorphAnalyzer) {
 		fMorphAnalyzer = newMorphAnalyzer;
 	}
+
 	/**
-	 * Insert the method's description here.
-	 * Creation date: (29.07.01 22:00:15)
-	 * @param newName java.lang.String
+	 * Insert the method's description here. Creation date: (29.07.01 22:00:15)
+	 * 
+	 * @param newName
+	 *            java.lang.String
 	 */
 	public void setName(java.lang.String newName) {
 		fName = newName;
@@ -515,32 +569,6 @@ public class Database implements IDatabase {
 
 	public void setPlainPrinter(IAnswerPrinter printer) {
 		fPlainPrinter = printer;
-	}
-
-	public static IDatabase createDatabase(DatabaseConfiguration dc) throws Exception {
-		Database ret = new Database();
-		String dbClass = dc.getDbClass();
-		if (dbClass != null) {
-			try {
-				ret = (Database) Class.forName(dbClass).newInstance();
-			} catch (Throwable t) {
-				//DatabaseFactory.log("Instantiation error: " + t);
-			}
-		}
-		try {
-			String msg = ret.initialize(dc);
-			//DatabaseFactory.log(msg);
-		} catch (Throwable t) {
-			//t.printStackTrace();
-			//DatabaseFactory.log(t.toString());
-			throw new Exception(t);
-		}
-	    return ret;
-	}
-	public IWordPosition getKey(int pos) {
-		int p = pos % getSize();
-		String key = ((IKey) getIndex().get(p)).getKey();
-		return new WordPosition(key, p);
 	}
 
 }

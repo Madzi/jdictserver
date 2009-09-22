@@ -1,37 +1,40 @@
 package org.dict.kernel;
 
 /**
- * Insert the type's description here.
- * Creation date: (7/31/01 3:35:05 PM)
+ * Insert the type's description here. Creation date: (7/31/01 3:35:05 PM)
+ * 
  * @author: Administrator
  */
 public interface IDictEngine {
-/**
- * Insert the method's description here.
- * Creation date: (7/31/01 3:35:55 PM)
- * @return IDefinition[]
- * @param db java.lang.String
- * @param word java.lang.String
- */
-IAnswer[] define(String db, String word);
+	void addDatabase(IDatabase db);
 
-IDatabase[] getDatabases();
+	/**
+	 * Insert the method's description here. Creation date: (7/31/01 3:35:55 PM)
+	 * 
+	 * @return IDefinition[]
+	 * @param db
+	 *            java.lang.String
+	 * @param word
+	 *            java.lang.String
+	 */
+	IAnswer[] define(String db, String word);
 
-void addDatabase(IDatabase db);
+	IAnswer[] defineMatch(String db, String word, String pos, boolean define, int strategy);
 
-void removeDatabase(IDatabase db);
+	IDatabase[] getDatabases();
 
+	public IAnswer[] lookup(IRequest req);
 
-IAnswer[] defineMatch(String db, String word, String pos, boolean define, int strategy);
+	/**
+	 * Insert the method's description here. Creation date: (7/31/01 3:36:20 PM)
+	 * 
+	 * @return IAnswer[]
+	 * @param db
+	 *            java.lang.String
+	 * @param word
+	 *            java.lang.String
+	 */
+	IAnswer[] match(String db, String word, int strategy);
 
-/**
- * Insert the method's description here.
- * Creation date: (7/31/01 3:36:20 PM)
- * @return IAnswer[]
- * @param db java.lang.String
- * @param word java.lang.String
- */
-IAnswer[] match(String db, String word, int strategy);
-
-public IAnswer[] lookup(IRequest req);
+	void removeDatabase(IDatabase db);
 }

@@ -14,11 +14,43 @@ import java.util.Vector;
 
 /**
  * @author duc
- *
+ * 
  */
 
 public class DatabaseConfiguration {
-	
+
+	private static String[] getDatabaseNames(String cfg) {
+		Vector<String> v = new Vector<String>(5);
+		try {
+			BufferedReader r = new BufferedReader(new FileReader(cfg));
+			String s;
+			while ((s = r.readLine()) != null) {
+				if (s.startsWith("#"))
+					continue;
+				int idx = s.indexOf('.');
+				if (idx > 0 && s.indexOf('=', idx) > 0) {
+					s = s.substring(0, idx);
+					if (!v.contains(s)) {
+						v.addElement(s);
+					}
+				}
+			}
+			r.close();
+		} catch (Throwable t) {
+			// t.printStackTrace();
+		}
+		String[] dbIDs = new String[v.size()];
+		v.copyInto(dbIDs);
+		return dbIDs;
+	}
+
+	static File getFile(File cfg, String s) {
+		File f = new File(s);
+		if (f.isAbsolute())
+			return f;
+		return new File(cfg.getParent(), s);
+	}
+
 	public static DatabaseConfiguration[] readConfiguration(String cfg) {
 		File f = new File(cfg);
 		if (!f.exists()) {
@@ -33,50 +65,44 @@ public class DatabaseConfiguration {
 			t.printStackTrace();
 		}
 		String[] dbIDs = getDatabaseNames(cfg);
-		Vector v = new Vector(dbIDs.length);
+		Vector<DatabaseConfiguration> v = new Vector<DatabaseConfiguration>(dbIDs.length);
 		for (int i = 0; i < dbIDs.length; i++) {
-			if ("false".equals(p.getProperty(dbIDs[i]+".use"))) continue;
+			if ("false".equals(p.getProperty(dbIDs[i] + ".use")))
+				continue;
 			v.addElement(new DatabaseConfiguration(dbIDs[i], f, p));
 		}
 		DatabaseConfiguration[] ret = new DatabaseConfiguration[v.size()];
 		v.copyInto(ret);
 		return ret;
 	}
-	
-	static File getFile(File cfg, String s) {
-		File f = new File(s);
-		if (f.isAbsolute()) return f;
-		return new File(cfg.getParent(), s);
+
+	static String unescape(String s) {
+		String ret = s;
+		int k1 = ret.indexOf("&#");
+		int k2 = ret.indexOf(";", k1);
+		while (k1 >= 0 && k2 > k1) {
+			String esc = ret.substring(k1 + "&#".length(), k2);
+			String c = "";
+			try {
+				if (esc.toLowerCase().startsWith("x")) {
+					c = "" + (char) Integer.parseInt(esc.substring(1), 16);
+				} else {
+					c = "" + (char) Integer.parseInt(esc);
+				}
+			} catch (Throwable e) {
+			}
+			ret = ret.substring(0, k1) + c + ret.substring(k2 + 1);
+			k1 = ret.indexOf("&#");
+			k2 = ret.indexOf(";", k1);
+		}
+		return ret;
 	}
 
-	private static String[] getDatabaseNames(String cfg) {
-		Vector v = new Vector(5);
-		try {
-			BufferedReader r = new BufferedReader(new FileReader(cfg));
-			String s;
-			while ((s = r.readLine()) != null) {
-				if (s.startsWith("#")) continue;
-				int idx = s.indexOf('.');
-				if (idx > 0 && s.indexOf('=', idx) > 0) {
-					s = s.substring(0, idx);
-					if (!v.contains(s)) {
-						v.addElement(s);
-					}
-				}
-			}
-			r.close();
-		} catch (Throwable t) {
-			//t.printStackTrace();
-		}
-		String[] dbIDs = new String[v.size()];
-		v.copyInto(dbIDs);
-		return dbIDs;
-	}
-	
 	String id, name, dbClass, encoding, comparator, htmlPrinter, plainPrinter, morph;
 	File data, index, cfgFile;
+
 	boolean memoryIndex;
-	
+
 	public DatabaseConfiguration(String id, File f, Properties p) {
 		setId(id);
 		setCfgFile(f);
@@ -91,7 +117,21 @@ public class DatabaseConfiguration {
 		setHtmlPrinter(p.getProperty(id + ".html"));
 		setPlainPrinter(p.getProperty(id + ".txt"));
 	}
-	
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof DatabaseConfiguration) {
+			DatabaseConfiguration dc = (DatabaseConfiguration) o;
+			return getIndex().equals(dc.getIndex()) && getData().equals(dc.getData());
+		} else {
+			return false;
+		}
+	}
+
+	public File getCfgFile() {
+		return cfgFile;
+	}
+
 	public String getComparator() {
 		return comparator;
 	}
@@ -102,6 +142,17 @@ public class DatabaseConfiguration {
 
 	public String getDbClass() {
 		return dbClass;
+	}
+
+	public String getDisplayString() {
+		String s = unescape(getName());
+		if (s == null) {
+			s = getId();
+		}
+		if (s.length() > 20) {
+			s = s.substring(0, 17) + "...";
+		}
+		return s;
 	}
 
 	public String getEncoding() {
@@ -120,10 +171,6 @@ public class DatabaseConfiguration {
 		return index;
 	}
 
-	public boolean isMemoryIndex() {
-		return memoryIndex;
-	}
-
 	public String getMorph() {
 		return morph;
 	}
@@ -134,6 +181,19 @@ public class DatabaseConfiguration {
 
 	public String getPlainPrinter() {
 		return plainPrinter;
+	}
+
+	@Override
+	public int hashCode() {
+		return getIndex().hashCode();
+	}
+
+	public boolean isMemoryIndex() {
+		return memoryIndex;
+	}
+
+	public void setCfgFile(File file) {
+		cfgFile = file;
 	}
 
 	public void setComparator(String string) {
@@ -179,64 +239,10 @@ public class DatabaseConfiguration {
 	public void setPlainPrinter(String string) {
 		plainPrinter = string;
 	}
-	
-	public boolean equals(Object o) {
-		if (o instanceof DatabaseConfiguration) {
-			DatabaseConfiguration dc = (DatabaseConfiguration) o;
-			return getIndex().equals(dc.getIndex()) && getData().equals(dc.getData());
-		} else {
-			return false;
-		}
-	}
-	
-	public int hashCode() {
-		return getIndex().hashCode();
-	}
-	
-	public String getDisplayString() {
-		String s = unescape(getName());
-		if (s == null) {
-			s = getId();
-		}
-		if (s.length() > 20) {
-			s = s.substring(0, 17)+"...";
-		}
-		return s;
-	}
-	
+
+	@Override
 	public String toString() {
-		return getId()+" | Index: "+getIndex()+" | Data: "+getData();
+		return getId() + " | Index: " + getIndex() + " | Data: " + getData();
 	}
-
-	public File getCfgFile() {
-		return cfgFile;
-	}
-
-	public void setCfgFile(File file) {
-		cfgFile = file;
-	}
-
-	static String unescape(String s) {
-		String ret = s;
-		int k1 = ret.indexOf("&#");
-		int k2 = ret.indexOf(";", k1);
-		while (k1 >= 0 && k2 > k1) {
-			String esc = ret.substring(k1+"&#".length(), k2);
-			String c = "";
-			try {
-				if (esc.toLowerCase().startsWith("x")) {
-					c = ""+(char)Integer.parseInt(esc.substring(1), 16);
-				} else {
-					c = ""+(char)Integer.parseInt(esc);
-				}
-			} catch (Throwable e) {
-			}
-			ret = ret.substring(0, k1)+c+ret.substring(k2+1);
-			k1 = ret.indexOf("&#");
-			k2 = ret.indexOf(";", k1);
-		}
-		return ret; 
-	}
-	
 
 }

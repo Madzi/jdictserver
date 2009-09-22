@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 
 /**
  * @author duc
- *
+ * 
  */
 public interface IAnswerPrinter {
 	void printAnswer(IRequest req, IAnswer a, boolean matches, PrintWriter out) throws IOException;

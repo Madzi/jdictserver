@@ -6,17 +6,17 @@ package org.dict.kernel;
 
 /**
  * @author duc
- *
+ * 
  */
 public class WordList implements IWordList {
-	
+
 	String description;
 	IWordPosition[] wordPositions;
-	
+
 	public WordList() {
 		this("", new IWordPosition[0]);
 	}
-	
+
 	public WordList(String desc, IWordPosition[] arr) {
 		description = desc;
 		wordPositions = arr;

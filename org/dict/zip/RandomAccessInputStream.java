@@ -11,23 +11,32 @@ public class RandomAccessInputStream extends InputStream {
 	protected int mark = 0;
 
 	public RandomAccessInputStream(RandomAccessFile in) {
-	this.in = in;
+		this.in = in;
 	}
+
 	public RandomAccessInputStream(String file, String mode) throws IOException {
-	this(new RandomAccessFile(file, mode));
+		this(new RandomAccessFile(file, mode));
 	}
+
+	@Override
 	public int available() throws IOException {
-	return getLength() - getPos();
+		return getLength() - getPos();
 	}
+
+	@Override
 	public void close() throws IOException {
 		in.close();
 	}
+
 	public int getLength() throws IOException {
-		return (int)in.length();
+		return (int) in.length();
 	}
+
 	public int getPos() throws IOException {
-		return (int)in.getFilePointer();
+		return (int) in.getFilePointer();
 	}
+
+	@Override
 	public synchronized void mark(int markpos) {
 		try {
 			mark = getPos();
@@ -35,25 +44,37 @@ public class RandomAccessInputStream extends InputStream {
 			throw new RuntimeException(e.toString());
 		}
 	}
+
+	@Override
 	public boolean markSupported() {
-	return true;
+		return true;
 	}
+
+	@Override
 	public synchronized int read() throws IOException {
 		return in.read();
 	}
+
+	@Override
 	public int read(byte b[], int off, int len) throws IOException {
-	return in.read(b, off, len);
+		return in.read(b, off, len);
 	}
+
 	public void readFully(byte b[]) throws IOException {
 		in.readFully(b);
 	}
+
+	@Override
 	public synchronized void reset() throws IOException {
-	in.seek(mark);
+		in.seek(mark);
 	}
+
 	public void seek(long pos) throws IOException {
 		in.seek(pos);
 	}
+
+	@Override
 	public long skip(long n) throws IOException {
-		return (long)in.skipBytes((int)n);
+		return in.skipBytes((int) n);
 	}
 }
